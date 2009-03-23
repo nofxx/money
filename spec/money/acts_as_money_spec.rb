@@ -1,9 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 require File.dirname(__FILE__) + '/../../rails/init.rb'
 
-# Uncomment this once to create the db
- load_schema
-
 class Account < ActiveRecord::Base
   has_money :value, :total, :allow_nil => true
 end

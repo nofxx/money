@@ -11,9 +11,13 @@ describe Money do
   end
 
   it "should rounds the given cents to an integer" do
-    Money.new(1.00, "USD").cents.should == 1
+    Money.new(1.0, "USD").cents.should == 1
     Money.new(1.01, "USD").cents.should == 1
-    Money.new(1.50, "USD").cents.should == 2
+  end
+
+  it "should use the floor method" do
+    Money.new(1.50, "USD").cents.should == 1
+    Money.new(1.99, "USD").cents.should == 1
   end
 
   it "#currency returns the currency passed to the constructor" do
@@ -82,7 +86,7 @@ describe Money do
 
   it "should calculate compound tax" do
     @ma = Money.new(1000_00)
-    @ma.compound_interest(12.99,12).to_s.should eql("137.92")
+    @ma.compound_interest(12.99,12).to_s.should eql("137.91")
   end
 
   it "should calculate compound tax" do
@@ -92,7 +96,7 @@ describe Money do
 
   it "should calculate compound tax" do
     @ma = Money.new(2500_00)
-    @ma.compound_interest(12.99,3).to_s.should eql("82.07")
+    @ma.compound_interest(12.99,3).to_s.should eql("82.06")
   end
 
   it "shuld sum array" do
