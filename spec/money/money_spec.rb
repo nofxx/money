@@ -2,6 +2,10 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 
 describe Money do
+
+  it {  Money.new(10_00).to_f.should eql(10.0) }
+  it {  Money.new(10_00).to_s.should eql("10.00") }
+
   it "is associated to the singleton instance of VariableExchangeBank by default" do
     Money.new(0).bank.object_id.should == Money::VariableExchangeBank.instance.object_id
   end
@@ -56,58 +60,6 @@ describe Money do
     (Money.new(10_00, "USD") / 10).should == Money.new(1_00, "USD")
   end
 
-  it "# divides the money ammout in installments add last" do
-    @money = Money.new(10_00).split_in_installments(3)
-    @money[0].cents.should eql(334)
-    @money[1].cents.should eql(333)
-    @money[2].cents.should eql(333)
-  end
-
-  it "# divides the money ammout in installments add first" do
-    @money = Money.new(10_00).split_in_installments(3,true)
-    @money.to_s.should eql(["3.34", "3.33", "3.33"])
-  end
-
-  it "# divides the money ammout in installments base on payment" do
-    money = Money.new(3_00)
-    Money.new(10_00).in_installments_of(money)[0].cents.should eql(334)
-    Money.new(10_00).in_installments_of(money)[1].cents.should eql(333)
-    Money.new(10_00).in_installments_of(money)[2].cents.should eql(333)
-  end
-
-  it "shuld sum array" do
-    Money.new(10_00).split_in_installments(3).sum.cents.should eql(1000)
-  end
-
-  it "should calculate tax" do
-    Money.new(100).add_tax(20).cents.should eql(120)
-    Money.new(100).add_tax(-20).cents.should eql(80)
-  end
-
-  it "should calculate compound tax" do
-    @ma = Money.new(1000_00)
-    @ma.compound_interest(12.99,12).to_s.should eql("137.91")
-  end
-
-  it "should calculate compound tax" do
-    @ma = Money.new(1000_00)
-    @ma.simple_interest(12.99,12).to_s.should eql("129.90")
-  end
-
-  it "should calculate compound tax" do
-    @ma = Money.new(2500_00)
-    @ma.compound_interest(12.99,3).to_s.should eql("82.06")
-  end
-
-  it "shuld sum array" do
-    @money = Money.new(10_00).add_tax(10)
-    @money.split_in_installments(3).sum.cents.should eql(1100)
-  end
-
-  it {  Money.new(10_00).to_f.should eql(10.0) }
-  it {  Money.new(10_00).to_s.should eql("10.00") }
-
-
   it "should create a new Money object of 0 cents if empty" do
     Money.empty.should == Money.new(0)
   end
@@ -128,27 +80,86 @@ describe Money do
     Money.real(50).should == Money.new(50, "BRL")
   end
 
-  it "Money.add_rate works" do
-    Money.add_rate("EUR", "USD", 10)
-    Money.new(10_00, "EUR").exchange_to("USD").should == Money.new(100_00, "USD")
+
+  describe "Installments" do
+
+    it "# divides the money ammout in installments add last" do
+      @money = Money.new(10_00).split_in_installments(3)
+      @money[0].cents.should eql(334)
+      @money[1].cents.should eql(333)
+      @money[2].cents.should eql(333)
+    end
+
+    it "# divides the money ammout in installments add first" do
+      @money = Money.new(10_00).split_in_installments(3,true)
+      @money.to_s.should eql(["3.34", "3.33", "3.33"])
+    end
+
+    it "# divides the money ammout in installments base on payment" do
+      money = Money.new(3_00)
+      Money.new(10_00).in_installments_of(money)[0].cents.should eql(334)
+      Money.new(10_00).in_installments_of(money)[1].cents.should eql(333)
+      Money.new(10_00).in_installments_of(money)[2].cents.should eql(333)
+    end
+
+    it "shuld sum array" do
+      Money.new(10_00).split_in_installments(3).sum.cents.should eql(1000)
+    end
+
+    it "should calculate tax" do
+      Money.new(100).add_tax(20).cents.should eql(120)
+      Money.new(100).add_tax(-20).cents.should eql(80)
+    end
+
+    it "shuld sum array" do
+      @money = Money.new(10_00).add_tax(10)
+      @money.split_in_installments(3).sum.cents.should eql(1100)
+    end
+
   end
 
-  it "Money method missing exchange" do
-     Money.add_rate("EUR", "BRL", 10)
-     Money.new(10_00, "EUR").as_brl.should == Money.new(100_00, "BRL")
+  describe "Taxes and Interest" do
+
+    it "Money.add_rate works" do
+      Money.add_rate("EUR", "USD", 10)
+      Money.new(10_00, "EUR").exchange_to("USD").should == Money.new(100_00, "USD")
+    end
+
+    it "Money method missing exchange" do
+      Money.add_rate("EUR", "BRL", 10)
+      Money.new(10_00, "EUR").as_brl.should == Money.new(100_00, "BRL")
+    end
+
+    it "should calculate compound tax" do
+      m = Money.new(1000_00)
+      m.compound_interest(12.99,12).to_s.should eql("137.91")
+    end
+
+    it "should simple interest" do
+      m = Money.new(1000_00)
+      m.simple_interest(12.99,12).to_s.should eql("129.90")
+    end
+
+    it "should calculate compound interest" do
+      m = Money.new(2500_00)
+      m.compound_interest(12.99,3).to_s.should eql("82.06")
+    end
+
   end
 
   describe "Format out " do
 
     describe "Options" do
       before(:each) do
-        @cash = Money.new(200)
+        @cash =  Money.new(2_00, "JPY")
       end
 
-      it { @cash.format.should eql("$2.00") }
+      it { @cash.format.should eql("¥2.00") }
       it { @cash.format(:symbol => "R$ ").should eql("R$ 2.00") }
-      it { @cash.format(:no_cents => true).should eql("$2") }
+      it { @cash.format(:no_cents => true).should eql("¥2") }
       it { @cash.format(:no_cents => true, :symbol => "R$ ").should eql("R$ 2") }
+      it { @cash.format(:html => true).should eql("&yen;2.00") }
+
     end
 
     it { Money.new(0).format.should eql("$0.00") }

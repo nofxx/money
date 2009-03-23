@@ -240,6 +240,7 @@ class Money
       formatted << currency
       formatted << '</span>' if rules[:html]
     end
+    formatted.gsub!(CURRENCIES[currency][:symbol],CURRENCIES[currency][:html]) if rules[:html]
     formatted
    end
 

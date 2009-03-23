@@ -27,7 +27,7 @@ Install stable releases with the following command:
 The development version (hosted on Github) can be installed with:
 
   gem sources -a http://gems.github.com
-  gem install ShadowBelmolve-money
+  gem install nofxx-money
 
 
 == Usage
@@ -42,8 +42,11 @@ The development version (hosted on Github) can be installed with:
   money.currency  # => "USD"
   money.format    # => "$10.00"
 
+  Money.new(880088, "EUR").format # => €8,800.88
+  Money.new(-8000).format(:no_cents => true)  # => $-80
+
   Money.new(1000, "USD") == Money.new(1000, "USD")   # => true
-  Money.new(1000, "USD") == Money.new(100, "USD")    # => false
+  Money.new(1000, "USD") == Money.new( 100, "USD")   # => false
   Money.new(1000, "USD") == Money.new(1000, "EUR")   # => false
 
 
@@ -80,13 +83,13 @@ www.xe.com for the current rates or just returns <tt>rand(2)</tt>:
 
 === Ruby on Rails
 
-Use the +has_many+ helper to embed the money object in your models.
-The following example requires a +price_in_cents+ and a +price_currency+
-fields.
+Use the +has_money+ method to embed the money object in your models.
+The following example requires a +price_cents+ and a +price_currency+
+fields on the database.
 
 config/enviroment.rb
 
-  require.gem 'ShadowBelmolve-money', :lib => 'money'
+  require.gem 'nofxx-money', :lib => 'money'
 
 app/models/product.rb
 
@@ -107,7 +110,7 @@ migration:
 
 === Default Currency
 
-By default Money defaults to USD as its currency. This can be overwritten using
+By default Money defaults to USD as its currency. This can be overwritten using:
 
   Money.default_currency = "CAD"
 
