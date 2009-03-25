@@ -28,6 +28,9 @@ class Money
     attr_accessor :default_currency
   end
 
+  self.default_bank = VariableExchangeBank.instance
+  self.default_currency = "USD"
+
   CURRENCIES = {
     "USD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
     "CAD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
@@ -38,9 +41,6 @@ class Money
     "GBP" => { :delimiter => ",", :separator => ".", :symbol => '£', :html => '&pound;' },
     "JPY" => { :delimiter => ".", :separator => ".", :symbol => '¥', :html => '&yen;' },
   }
-  self.default_bank = VariableExchangeBank.instance
-  self.default_currency = "USD"
-
 
   # Create a new money object with value 0.
   def self.empty(currency = default_currency)
@@ -76,10 +76,10 @@ class Money
   #
   # Alternativly you can use the convinience methods like
   # Money.ca_dollar and Money.us_dollar
-  def initialize(cents, currency = Money.default_currency, bank = Money.default_bank)
+  def initialize(cents, currency = nil, bank = nil)
     @cents = cents.to_i
-    @currency = currency || default_currency
-    @bank = bank
+    @currency = currency || Money.default_currency
+    @bank = bank || Money.default_bank
   end
 
   # Do two money objects equal? Only works if both objects are of the same currency
@@ -96,6 +96,7 @@ class Money
   end
 
   def +(other_money)
+    other_money = Money.new(other_money) unless other_money.is_a? Money
     if currency == other_money.currency
       Money.new(cents + other_money.cents, other_money.currency)
     else
@@ -104,6 +105,7 @@ class Money
   end
 
   def -(other_money)
+    other_money = Money.new(other_money) unless other_money.is_a? Money
     if currency == other_money.currency
       Money.new(cents - other_money.cents, other_money.currency)
     else
@@ -138,13 +140,13 @@ class Money
 
   # Calculates compound interest
   # Returns a money object with the sum of self + it
-  def compound_interest(rate,count=1)
-    Money.new(cents * ((1 + rate / 100.0 / 12) ** count - 1))
+  def compound_interest(rate, count = 1, period = 12)
+    Money.new(cents * ((1 + rate / 100.0 / period) ** count - 1))
   end
 
   # Calculate self + simple interest
-  def simple_interest(rate,count=1)
-    Money.new(rate/100/12*cents*count)
+  def simple_interest(rate, count = 1, period = 12)
+    Money.new(rate / 100 / period * cents * count)
   end
 
   # Split money in number of installments
@@ -152,10 +154,11 @@ class Money
   # Money.new(10_00).split_in_installments(3)
   # => [ 3.34, 3.33, 3.33 ]  (All Money instances)
   #
-  def split_in_installments(fixnum,extra=nil,*opts)
+  def split_in_installments(fixnum, order=false)
     wallet = Wallet.new(fixnum, Money.new(cents/fixnum,currency))
     to_add = cents % fixnum
     to_add.times { |m| wallet[m] += Money.new(1) }
+    wallet.reverse! if order
     wallet
   end
 
@@ -164,8 +167,8 @@ class Money
   # Money.new(1000_00).split_in_installments(Money.new(300_00))
   # => [ 334_00, 333_00, 333_00 ]  (All Money instances)
   #
-  def in_installments_of(other_money,first=false)
-    split_in_installments(cents/other_money.cents,first)
+  def in_installments_of(other_money, order=false)
+    split_in_installments(cents/other_money.cents, order)
   end
 
   # Just a helper if you got tax inputs in percentage.

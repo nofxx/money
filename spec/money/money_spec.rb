@@ -42,21 +42,29 @@ describe Money do
     money.exchange_to("EUR")
   end
 
-  it "#exchange_to exchanges the amount properly" do
+  it "should exchange_to exchanges the amount properly" do
     money = Money.new(100_00, "USD")
     money.bank.should_receive(:exchange).with(100_00, "USD", "EUR").and_return(200_00)
     money.exchange_to("EUR").should == Money.new(200_00, "EUR")
   end
 
-  it "#== returns true if and only if their amount and currency are equal" do
+  it "should returns true if and only if their amount and currency are equal" do
     Money.new(1_00, "USD").should == Money.new(1_00, "USD")
   end
 
-  it "#* multiplies the money's amount by the multiplier while retaining the currency" do
+  it "should add retaining the currency" do
+    (Money.new(1_00, "USD") + 10).should == Money.new(1_10, "USD")
+  end
+
+  it "should substract retaining the currency" do
+    (Money.new(1_00, "USD") - 10).should == Money.new(90, "USD")
+  end
+
+  it "should multiply while retaining the currency" do
     (Money.new(1_00, "USD") * 10).should == Money.new(10_00, "USD")
   end
 
-  it "#* divides the money's amount by the divisor while retaining the currency" do
+  it "should divides while retaining the currency" do
     (Money.new(10_00, "USD") / 10).should == Money.new(1_00, "USD")
   end
 
@@ -80,19 +88,18 @@ describe Money do
     Money.real(50).should == Money.new(50, "BRL")
   end
 
-
   describe "Installments" do
 
-    it "# divides the money ammout in installments add last" do
+    it "# divides the money ammout in installments add first" do
       @money = Money.new(10_00).split_in_installments(3)
       @money[0].cents.should eql(334)
       @money[1].cents.should eql(333)
       @money[2].cents.should eql(333)
     end
 
-    it "# divides the money ammout in installments add first" do
+    it "# divides the money ammout in installments add last" do
       @money = Money.new(10_00).split_in_installments(3,true)
-      @money.to_s.should eql(["3.34", "3.33", "3.33"])
+      @money.to_s.should eql(["3.33", "3.33", "3.34"])
     end
 
     it "# divides the money ammout in installments base on payment" do
@@ -109,6 +116,11 @@ describe Money do
     it "should calculate tax" do
       Money.new(100).add_tax(20).cents.should eql(120)
       Money.new(100).add_tax(-20).cents.should eql(80)
+    end
+
+    it "shuld to_s wallet" do
+      @money = Money.new(10_00)
+      @money.split_in_installments(3).to_s.should eql(["3.34", "3.33", "3.33"])
     end
 
     it "shuld sum array" do
@@ -143,6 +155,11 @@ describe Money do
     it "should calculate compound interest" do
       m = Money.new(2500_00)
       m.compound_interest(12.99,3).to_s.should eql("82.06")
+    end
+
+    it "should calculate compound interest" do
+      m = Money.new(2500_00)
+      m.compound_interest(12.99,3,6).to_s.should eql("165.91")
     end
 
   end
