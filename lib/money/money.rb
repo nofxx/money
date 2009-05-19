@@ -84,7 +84,8 @@ class Money
 
   # Do two money objects equal? Only works if both objects are of the same currency
   def ==(other_money)
-    cents == other_money.cents && bank.same_currency?(currency, other_money.currency)
+    other_money.respond_to?(:cents) && cents == other_money.cents &&
+      other_money.respond_to?(:currency) && bank.same_currency?(currency, other_money.currency)
   end
 
   def <=>(other_money)
