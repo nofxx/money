@@ -151,12 +151,37 @@ class Money
   end
 
   #Round to nearest coin value
+  #  basically, we don't have coins for cents in CZK, 
+  #  our smallest fraction is 0.50CZK
   #
   #Money.new(14_58).round_to_coin(50) => 14.50
   def round_to_coin(coin)
     coef = 1.0/coin
     val = (cents * coef).round / coef
     Money.new(val, currency)
+  end
+
+  #Returns array a where
+  # a[0] is price _after_ applying tax (tax base)
+  # a[1] is tax
+  def tax_brakedown(tax)
+    _tax = (cents * (tax / 100.0)).round
+    [Money.new(cents + _tax, currency), Money.new(_tax, currency)]
+  end
+
+  #Returns array a where
+  # a[0] is price _before_ applying tax (tax base)
+  # a[1] is tax
+  def tax_reverse_brakedown(tax)
+    coef = tax/100.0
+    [Money.new((cents / (1+coef)).round, currency), 
+     Money.new((cents*coef/(1+coef)).round, currency) ]
+  end
+  
+  # Just a helper if you got tax inputs in percentage.
+  # Ie. add_tax(20) =>  cents * 1.20
+  def add_tax(tax)
+    tax_brakedown(tax)[0]
   end
 
   # Split money in number of installments
@@ -179,12 +204,6 @@ class Money
   #
   def in_installments_of(other_money, order=false)
     split_in_installments(cents/other_money.cents, order)
-  end
-
-  # Just a helper if you got tax inputs in percentage.
-  # Ie. add_tax(20) =>  cents * 1.20
-  def add_tax(tax)
-    Money.new(cents + cents / 100 * tax)
   end
 
   # Format the price according to several rules
