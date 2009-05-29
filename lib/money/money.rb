@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-require 'money/variable_exchange_bank'
+require 'money/exchange_bank'
 
 # Represents an amount of money in a certain currency.
 class Money
@@ -14,12 +14,22 @@ class Money
     #
     #   bank1 = MyBank.new
     #   bank2 = MyOtherBank.new
-    #e if VariableExchangeBank.
+    #
+    #   Money.default_bank = bank1
+    #   money1 = Money.new(10)
+    #   money1.bank  # => bank1
+    #
+    #   Money.default_bank = bank2
+    #   money2 = Money.new(10)
+    #   money2.bank  # => bank2
+    #   money1.bank  # => bank1
+    #
+    # The default value for this property is an instance if VariableExchangeBank.
     # It allows one to specify custom exchange rates:
     #
     #   Money.default_bank.add_rate("USD", "CAD", 1.24515)
     #   Money.default_bank.add_rate("CAD", "USD", 0.803115)
-    #   Money.us_dollar(100).exchange_to("CAD")  # => MONEY.ca_dollar(124)
+    #   Money.us_dollar(100).exchange_to("CAD")  # => Money.ca_dollar(124)
     #   Money.ca_dollar(100).exchange_to("USD")  # => Money.us_dollar(80)
     attr_accessor :default_bank
 
@@ -28,7 +38,7 @@ class Money
     attr_accessor :default_currency
   end
 
-  self.default_bank = VariableExchangeBank.instance
+  self.default_bank = ExchangeBank.instance
   self.default_currency = "USD"
 
   CURRENCIES = {
@@ -67,8 +77,8 @@ class Money
     Money.new(cents, "BRL")
   end
 
-  def self.add_rate(currency, rate)
-    Money.default_bank.add_rate(currency, rate)
+  def self.add_rate(*params)
+    Money.default_bank.add_rate(*params)
   end
 
   # Creates a new money object.
@@ -316,7 +326,7 @@ end
 
 #
 # Represent a financial array.
-# Investment/Time/Installments...
+# Investment/Time/Installments...TODO...
 #
 class Wallet < Array
 
