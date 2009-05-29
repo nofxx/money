@@ -12,10 +12,11 @@ This library aids one in handling money and different currencies. Features:
 
 Resources:
 
-- This fork: http://github.com/ShadowBelmolve/money
+- This fork: http://github.com/bobek/money
 - Website: http://money.rubyforge.org
 - RDoc API: http://money.rubyforge.org
-- Git repository: http://github.com/FooBarWidget/money/tree/master
+- Forked from: http://github.com/ShadowBelmolve/money/tree
+- Original git repository: http://github.com/FooBarWidget/money/tree/master
 
 
 == Download
@@ -27,7 +28,7 @@ Install stable releases with the following command:
 The development version (hosted on Github) can be installed with:
 
   gem sources -a http://gems.github.com
-  gem install ShadowBelmolve-money
+  gem install bobek-money
 
 
 == Usage
@@ -49,6 +50,12 @@ The development version (hosted on Github) can be installed with:
   Money.new(1000, "USD") == Money.new( 100, "USD")   # => false
   Money.new(1000, "USD") == Money.new(1000, "EUR")   # => false
 
+=== Rounding
+
+You can use round_to_coin when you don't have currency with coins for cents.
+E.g. if the smallest coin is 0.50, then
+
+  Money.new(1448, 'CZK').round_to_coin(50).to_s  # => "14.50"
 
 === Currency Exchange
 
@@ -95,7 +102,7 @@ fields on the database.
 
 config/enviroment.rb
 
-  require.gem 'ShadowBelmolve-money', :lib => 'money'
+  require.gem 'bobek-money', :lib => 'money'
 
 app/models/product.rb
 
