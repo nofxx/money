@@ -1,5 +1,7 @@
-require 'thread'
 require 'money/errors'
+require 'net/http'
+require 'rubygems'
+require 'hpricot'
 
 # Class for aiding in exchanging money between different currencies.
 # By default, the Money class uses an object of this class (accessible through
@@ -10,13 +12,13 @@ require 'money/errors'
 # exchanges with +exchange+. For example:
 #
 #  bank = Money::VariableExchangeBank.new
-#  bank.add_rate("USD", "CAD", 1.24515)
-#  bank.add_rate("CAD", "USD", 0.803115)
+#  bank.add_rate("CAD", 0.803115)
+#  bank.add_rate("USD", 1.24515)
 #  
 #  # Exchange 100 CAD to USD:
-#  bank.exchange(100_00, "CAD", "USD")  # => 124
+#  bank.exchange(100_00, "CAD", "USD")  # => 15504
 #  # Exchange 100 USD to CAD:
-#  bank.exchange(100_00, "USD", "CAD")  # => 80
+#  bank.exchange(100_00, "USD", "CAD")  # => 6450
 class Money
   class VariableExchangeBank
     # Returns the singleton instance of VariableExchangeBank.
@@ -28,21 +30,20 @@ class Money
     
     def initialize
       @rates = {}
+      @rates["USD"] = 1.0
       @mutex = Mutex.new
     end
-    
-    # Registers a conversion rate. +from+ and +to+ are both currency names.
-    def add_rate(from, to, rate)
+
+    def add_rate(currency, rate)
       @mutex.synchronize do
-        @rates["#{from}_TO_#{to}".upcase] = rate
+        @rates[currency.upcase] = (currency.upcase != Money.default_currency) ? (rate * @rates[Money.default_currency]) : rate
       end
     end
-    
-    # Gets the rate for exchanging the currency named +from+ to the currency
-    # named +to+. Returns nil if the rate is unknown.
-    def get_rate(from, to)
+
+    def get_rate(currency = nil)
       @mutex.synchronize do
-        @rates["#{from}_TO_#{to}".upcase] 
+        return nil unless @rates[currency]
+        (currency != Money.default_currency) ? @rates[currency.upcase] / @rates[Money.default_currency] : @rates[currency.upcase]
       end
     end
     
@@ -60,11 +61,44 @@ class Money
     #
     # If the conversion rate is unknown, then Money::UnknownRate will be raised.
     def exchange(cents, from_currency, to_currency)
-      rate = get_rate(from_currency, to_currency)
-      if !rate
+      from_currency.upcase!
+      to_currency.upcase!
+      if !@rates[from_currency] or !@rates[to_currency]        
         raise Money::UnknownRate, "No conversion rate known for '#{from_currency}' -> '#{to_currency}'"
       end
-      (cents * rate).floor
+      ((cents / @rates[from_currency]) * @rates[to_currency]).round
+    end
+
+    # Fetch rates
+    def fetch_rates
+      xml = Hpricot.XML(
+        Net::HTTP.get(
+          URI.parse('http://www.ecb.int/stats/eurofxref/eurofxref-daily.xml')
+                     )
+             )
+
+      @rates["EUR"] = 1.0
+      (xml/:Cube).each do |ele|
+        @rates[ele['currency'].upcase] = ele['rate'].to_f if ele['currency']
+      end
+    end
+
+
+    # Auto fetch the currencies every X seconds
+    # if no time is give, will fetch every hour
+    def auto_fetch(time = 60*60)
+      @auto_fetch.kill if (@auto_fetch && @auto_fetch.alive?)
+      @auto_fetch = Thread.new {
+        loop do
+          self.fetch_rates
+          sleep time
+        end
+      }
+    end
+
+    # stop auto fetch
+    def stop_fetch
+      @auto_fetch.kill if (@auto_fetch && @auto_fetch.alive?)
     end
     
     @@singleton = VariableExchangeBank.new

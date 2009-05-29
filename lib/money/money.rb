@@ -4,8 +4,8 @@ require 'money/variable_exchange_bank'
 # Represents an amount of money in a certain currency.
 class Money
   include Comparable
-
   attr_reader :cents, :currency, :bank
+  alias :to_i :cents
 
   class << self
     # Each Money object is associated to a bank object, which is responsible
@@ -67,8 +67,8 @@ class Money
     Money.new(cents, "BRL")
   end
 
-  def self.add_rate(from_currency, to_currency, rate)
-    Money.default_bank.add_rate(from_currency, to_currency, rate)
+  def self.add_rate(currency, rate)
+    Money.default_bank.add_rate(currency, rate)
   end
 
   # Creates a new money object.
@@ -84,7 +84,8 @@ class Money
 
   # Do two money objects equal? Only works if both objects are of the same currency
   def ==(other_money)
-    cents == other_money.cents && bank.same_currency?(currency, other_money.currency)
+    other_money.respond_to?(:cents) && cents == other_money.cents &&
+      other_money.respond_to?(:currency) && bank.same_currency?(currency, other_money.currency)
   end
 
   def <=>(other_money)
@@ -111,11 +112,6 @@ class Money
     else
       Money.new(cents - other_money.exchange_to(currency).cents, currency)
     end
-  end
-
-  # get the cents value of the object
-  def cents
-    @cents
   end
 
   # multiply money by fixnum
@@ -149,6 +145,41 @@ class Money
     Money.new(rate / 100 / period * cents * count)
   end
 
+  # Round to nearest coin value
+  # basically, we don't have coins for cents in CZK,
+  # our smallest fraction is 0.50CZK
+  #
+  #    Money.new(14_58).round_to_coin(50) => 14.50
+  #
+  def round_to_coin(coin)
+    coef = 1.0/coin
+    val = (cents * coef).floor / coef
+    Money.new(val, currency)
+  end
+
+  # Returns array a where
+  #  a[0] is price _after_ applying tax (tax base)
+  #  a[1] is tax
+  def tax_breakdown(tax)
+    _tax = (cents * (tax / 100.0)).round
+    [Money.new(cents + _tax, currency), Money.new(_tax, currency)]
+  end
+
+  #Returns array a where
+  # a[0] is price _before_ applying tax (tax base)
+  # a[1] is tax
+  def tax_reverse_breakdown(tax)
+    coef = tax/100.0
+    [Money.new((cents / (1+coef)).round, currency),
+     Money.new((cents*coef/(1+coef)).round, currency) ]
+  end
+
+  # Just a helper if you got tax inputs in percentage.
+  # Ie. add_tax(20) =>  cents * 1.20
+  def add_tax(tax)
+    tax_breakdown(tax)[0]
+  end
+
   # Split money in number of installments
   #
   # Money.new(10_00).split_in_installments(3)
@@ -169,12 +200,6 @@ class Money
   #
   def in_installments_of(other_money, order=false)
     split_in_installments(cents/other_money.cents, order)
-  end
-
-  # Just a helper if you got tax inputs in percentage.
-  # Ie. add_tax(20) =>  cents * 1.20
-  def add_tax(tax)
-    Money.new(cents + cents / 100 * tax)
   end
 
   # Format the price according to several rules
@@ -259,7 +284,6 @@ class Money
     end
     rules
   end
-
 
   # Money.ca_dollar(100).to_s => "1.00"
   def to_s
