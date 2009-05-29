@@ -114,8 +114,16 @@ describe Money do
     end
 
     it "should calculate tax" do
-      Money.new(100).add_tax(20).cents.should eql(120)
-      Money.new(100).add_tax(-20).cents.should eql(80)
+      Money.new(1218).add_tax(19).cents.should eql(1449)
+      Money.new(1218).add_tax(-19).cents.should eql(987)
+    end
+
+    it "should provide tax brakedown" do
+      Money.new(1225).tax_brakedown(19).map{|c| c.to_s}.should eql(['14.58','2.33'])
+    end
+
+    it "should provide reverse tax brakedown" do
+      Money.new(-8).tax_reverse_brakedown(19).map{|c| c.to_s}.should eql(['-0.07','-0.01'])
     end
 
     it "shuld to_s wallet" do
