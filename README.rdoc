@@ -12,9 +12,10 @@ This library aids one in handling money and different currencies. Features:
 
 Resources:
 
-- This fork: http://github.com/ShadowBelmolve/money
 - Website: http://money.rubyforge.org
 - RDoc API: http://money.rubyforge.org
+- This fork: http://github.com/ShadowBelmolve/money
+- Forked from: http://github.com/nofxx/money
 - Git repository: http://github.com/FooBarWidget/money/tree/master
 
 
