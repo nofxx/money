@@ -31,15 +31,20 @@ class Money
     def initialize
       @rates = {}
       @rates["USD"] = 1.0
+      @mutex = Mutex.new
     end
 
     def add_rate(currency, rate)
-      @rates[currency.upcase] = (currency.upcase != Money.default_currency) ? (rate * @rates[Money.default_currency]) : rate
+      @mutex.synchronize do
+        @rates[currency.upcase] = (currency.upcase != Money.default_currency) ? (rate * @rates[Money.default_currency]) : rate
+      end
     end
 
     def get_rate(currency = nil)
-      return nil unless @rates[currency]
-      (currency != Money.default_currency) ? @rates[currency.upcase] / @rates[Money.default_currency] : @rates[currency.upcase]
+      @mutex.synchronize do
+        return nil unless @rates[currency]
+        (currency != Money.default_currency) ? @rates[currency.upcase] / @rates[Money.default_currency] : @rates[currency.upcase]
+      end
     end
     
     # Given two currency names, checks whether they're both the same currency.
