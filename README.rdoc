@@ -12,9 +12,10 @@ This library aids one in handling money and different currencies. Features:
 
 Resources:
 
-- This fork: http://github.com/nofxx/money
 - Website: http://money.rubyforge.org
 - RDoc API: http://money.rubyforge.org
+- This fork: http://github.com/ShadowBelmolve/money
+- Forked from: http://github.com/nofxx/money
 - Git repository: http://github.com/FooBarWidget/money/tree/master
 
 
@@ -56,24 +57,30 @@ Exchanging money is performed through an exchange bank object. The default
 exchange bank object requires one to manually specify the exchange rate. Here's
 an example of how it works:
 
-  Money.add_rate("USD", "CAD", 1.24515)
-  Money.add_rate("CAD", "USD", 0.803115)
+  Money.add_rate("CAD", 0.803115)
+  Money.add_rate("USD", 1.24515)
 
-  Money.us_dollar(100).exchange_to("CAD")  # => Money.new(124, "CAD")
-  Money.ca_dollar(100).exchange_to("USD")  # => Money.new(80, "USD")
+  Money.us_dollar(100_00).exchange_to("CAD")  # => Money.new(15504, "CAD")
+  Money.ca_dollar(100_00).exchange_to("USD")  # => Money.new(6450, "USD")
 
 or
 
-  Money.us_dollar(100).to_cad              # => Money.new(124, "CAD")
-  Money.ca_dollar(100).to_usd              # => Money.new(80, "USD")
+  Money.us_dollar(100).as_cad              # => Money.new(155, "CAD")
+  Money.ca_dollar(100).as_usd              # => Money.new(64, "USD")
 
 Comparison and arithmetic operations work as expected:
 
   Money.new(1000, "USD") <=> Money.new(900, "USD")   # => 1; 9.00 USD is smaller
   Money.new(1000, "EUR") + Money.new(10, "EUR") == Money.new(1010, "EUR")
 
-  Money.add_rate("USD", "EUR", 0.5)
+  Money.add_rate("EUR", 0.5)
   Money.new(1000, "EUR") + Money.new(1000, "USD") == Money.new(1500, "EUR")
+
+Fetch the exchange rates published by the European Bank
+
+  Money.default_bank.fetch_rates          # Fetch the rates
+  Money.default_bank.auto_fetch 3600      # Fetch the rates every hour
+  Money.default_bank.stop_fetch           # Stop auto-fetch
 
 There is nothing stopping you from creating bank objects which scrapes
 www.xe.com for the current rates or just returns <tt>rand(2)</tt>:
