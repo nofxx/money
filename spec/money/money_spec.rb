@@ -7,8 +7,8 @@ describe Money do
   it { Money.new(10_00).to_s.should eql("10.00") }
   it { Money.new(199).to_i.should eql(199) }
 
-  it "is associated to the singleton instance of VariableExchangeBank by default" do
-    Money.new(0).bank.object_id.should == Money::VariableExchangeBank.instance.object_id
+  it "is associated to the singleton instance of ExchangeBank by default" do
+    Money.new(0).bank.object_id.should == Money::ExchangeBank.instance.object_id
   end
 
   it "should return the amount of cents passed to the constructor" do
@@ -153,7 +153,6 @@ describe Money do
   describe "Taxes and Interest" do
 
     it "Money rate works" do
-      pending
       Money.add_rate("EUR", "USD", 10)
       Money.new(10_00, "EUR").exchange_to("USD").should == Money.new(100_00, "USD")
     end
@@ -165,10 +164,7 @@ describe Money do
     end
 
     it "Money method missing exchange" do
-#      Money.add_rate("EUR", "BRL", 10)
-
-      Money.add_rate("EUR", 1.0)
-      Money.add_rate("BRL", 10)
+      Money.add_rate("EUR", "BRL", 10)
       Money.new(10_00, "EUR").as_brl.should == Money.new(100_00, "BRL")
     end
 
