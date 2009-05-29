@@ -150,6 +150,15 @@ class Money
     Money.new(rate / 100 / period * cents * count)
   end
 
+  #Round to nearest coin value
+  #
+  #Money.new(14_58).round_to_coin(50) => 14.50
+  def round_to_coin(coin)
+    coef = 1.0/coin
+    val = (cents * coef).round / coef
+    Money.new(val, currency)
+  end
+
   # Split money in number of installments
   #
   # Money.new(10_00).split_in_installments(3)
