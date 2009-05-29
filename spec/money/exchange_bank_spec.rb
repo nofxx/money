@@ -120,6 +120,8 @@ describe Money::ExchangeBank do
       @bank.fetch_rates
       @bank.get_rate("DKK").should be_nil
       @bank.get_rate("EUR", "USD").should be_close(1.4098, 0.001)
+      Money.default_currency = "USD"
+
     end
   end
 

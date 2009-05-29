@@ -223,51 +223,55 @@ describe Money do
     it { Money.new(880000000000, "GBP").format(:no_cents => true).should eql("£8,800,000,000") }
     it { Money.new(8800000000088, "EUR").format.should eql("€88,000,000,000.88") }
 
-  end
-
-
-  describe "Actions involving two Money objects" do
-    describe "if the other Money object has the same currency" do
-      it "#<=> compares the two objects' amounts" do
-        (Money.new(1_00, "USD") <=> Money.new(1_00, "USD")).should == 0
-        (Money.new(1_00, "USD") <=> Money.new(99, "USD")).should > 0
-        (Money.new(1_00, "USD") <=> Money.new(2_00, "USD")).should < 0
-      end
-
-      it "#+ adds the other object's amount to the current object's amount while retaining the currency" do
-        (Money.new(10_00, "USD") + Money.new(90, "USD")).should == Money.new(10_90, "USD")
-      end
-
-      it "#- substracts the other object's amount from the current object's amount while retaining the currency" do
-        (Money.new(10_00, "USD") - Money.new(90, "USD")).should == Money.new(9_10, "USD")
-      end
+    it "should fail nicely if symbol can`t be found" do
+      Money.default_currency = "XXX"
+      Money.new(800).format.should eql("$8.00")
+      Money.default_currency = "USD"
     end
 
-    describe "if the other Money object has a different currency" do
-      it "#<=> compares the two objects' amount after converting the other object's amount to its own currency" do
-        target = Money.new(200_00, "EUR")
-        target.should_receive(:exchange_to).with("USD").and_return(Money.new(300_00, "USD"))
-        (Money.new(100_00, "USD") <=> target).should < 0
+    describe "Actions involving two Money objects" do
+      describe "if the other Money object has the same currency" do
+        it "#<=> compares the two objects' amounts" do
+          (Money.new(1_00, "USD") <=> Money.new(1_00, "USD")).should == 0
+          (Money.new(1_00, "USD") <=> Money.new(99, "USD")).should > 0
+          (Money.new(1_00, "USD") <=> Money.new(2_00, "USD")).should < 0
+        end
 
-        target = Money.new(200_00, "EUR")
-        target.should_receive(:exchange_to).with("USD").and_return(Money.new(100_00, "USD"))
-        (Money.new(100_00, "USD") <=> target).should == 0
+        it "#+ adds the other object's amount to the current object's amount while retaining the currency" do
+          (Money.new(10_00, "USD") + Money.new(90, "USD")).should == Money.new(10_90, "USD")
+        end
 
-        target = Money.new(200_00, "EUR")
-        target.should_receive(:exchange_to).with("USD").and_return(Money.new(99_00, "USD"))
-        (Money.new(100_00, "USD") <=> target).should > 0
+        it "#- substracts the other object's amount from the current object's amount while retaining the currency" do
+          (Money.new(10_00, "USD") - Money.new(90, "USD")).should == Money.new(9_10, "USD")
+        end
       end
 
-      it "#+ adds the other object's amount, converted to this object's currency, to this object's amount while retaining its currency" do
-        other = Money.new(90, "EUR")
-        other.should_receive(:exchange_to).with("USD").and_return(Money.new(9_00, "USD"))
-        (Money.new(10_00, "USD") + other).should == Money.new(19_00, "USD")
-      end
+      describe "if the other Money object has a different currency" do
+        it "#<=> compares the two objects' amount after converting the other object's amount to its own currency" do
+          target = Money.new(200_00, "EUR")
+          target.should_receive(:exchange_to).with("USD").and_return(Money.new(300_00, "USD"))
+          (Money.new(100_00, "USD") <=> target).should < 0
 
-      it "#- substracts the other object's amount, converted to this object's currency, from this object's amount while retaining its currency" do
-        other = Money.new(90, "EUR")
-        other.should_receive(:exchange_to).with("USD").and_return(Money.new(9_00, "USD"))
-        (Money.new(10_00, "USD") - other).should == Money.new(1_00, "USD")
+          target = Money.new(200_00, "EUR")
+          target.should_receive(:exchange_to).with("USD").and_return(Money.new(100_00, "USD"))
+          (Money.new(100_00, "USD") <=> target).should == 0
+
+          target = Money.new(200_00, "EUR")
+          target.should_receive(:exchange_to).with("USD").and_return(Money.new(99_00, "USD"))
+          (Money.new(100_00, "USD") <=> target).should > 0
+        end
+
+        it "#+ adds the other object's amount, converted to this object's currency, to this object's amount while retaining its currency" do
+          other = Money.new(90, "EUR")
+          other.should_receive(:exchange_to).with("USD").and_return(Money.new(9_00, "USD"))
+          (Money.new(10_00, "USD") + other).should == Money.new(19_00, "USD")
+        end
+
+        it "#- substracts the other object's amount, converted to this object's currency, from this object's amount while retaining its currency" do
+          other = Money.new(90, "EUR")
+          other.should_receive(:exchange_to).with("USD").and_return(Money.new(9_00, "USD"))
+          (Money.new(10_00, "USD") - other).should == Money.new(1_00, "USD")
+        end
       end
     end
   end
