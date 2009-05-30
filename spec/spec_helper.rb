@@ -1,4 +1,5 @@
 begin
+  require 'rubygems'
   require 'spec'
   require 'active_record'
 rescue LoadError
@@ -6,8 +7,8 @@ rescue LoadError
   gem 'rspec'
   require 'spec'
 end
-require 'active_record'
-$:.unshift(File.dirname(__FILE__) + '/../lib')
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'money'
 
 config = YAML.load_file(File.dirname(__FILE__) + '/db/database.yml')
