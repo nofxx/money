@@ -88,7 +88,7 @@ class Money
   # Money.ca_dollar and Money.us_dollar
   def initialize(cents, currency = nil, bank = nil)
     @cents = cents.to_i
-    @currency = (currency ? currency.upcase : Money.default_currency)
+    @currency = (currency || Money.default_currency).upcase
     @bank = bank || Money.default_bank
   end
 
