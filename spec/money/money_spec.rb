@@ -158,9 +158,8 @@ describe Money do
     end
 
     it "Money.add_rate works" do
-      Money.add_rate("USD", 1.0)
-      Money.add_rate("EUR", 10)
-      Money.new(10_00, "EUR").exchange_to("USD").should == Money.new(1_00, "USD")
+      Money.add_rate("BGL", 10)
+      Money.new(10_00, "USD").exchange_to("BGL").should == Money.new(100_00, "BGL")
     end
 
     it "Money method missing exchange" do
@@ -217,6 +216,7 @@ describe Money do
     it { Money.new(800000).format.should eql("$8,000.00") }
     it { Money.new(-8000000, "JPY").format(:no_cents => true).should eql("¥-80.000") }
     it { Money.new(87654321, "BRL").format.should eql("R$876.543,21") }
+    it { Money.new(87654321, "brl").format.should eql("R$876.543,21") }
     it { Money.new(800000000, "BRL").format.should eql("R$8.000.000,00") }
     it { Money.new(8000000000, "BRL").format.should eql("R$80.000.000,00") }
     it { Money.new(80000000000, "CAD").format.should eql("$800,000,000.00") }
@@ -224,9 +224,8 @@ describe Money do
     it { Money.new(8800000000088, "EUR").format.should eql("€88,000,000,000.88") }
 
     it "should fail nicely if symbol can`t be found" do
-      Money.default_currency = "XXX"
+      Money.stub!(:default_currency).and_return("XXX")
       Money.new(800).format.should eql("$8.00")
-      Money.default_currency = "USD"
     end
 
     describe "Actions involving two Money objects" do
