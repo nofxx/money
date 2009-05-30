@@ -100,7 +100,7 @@ describe Money::ExchangeBank do
     end
 
     it "should fetch data" do
-      Money.default_currency = "EUR"
+      Money.stub!(:default_currency).and_return("EUR")
       @bank.fetch_rates
       @bank.get_rate("DKK").should be_close(7.4453, 0.0001)
       @bank.get_rate("BRL").should be_close(2.832, 0.001)
@@ -108,7 +108,7 @@ describe Money::ExchangeBank do
     end
 
     it "should fetch diff than eur" do
-      Money.default_currency = "BRL"
+      Money.stub!(:default_currency).and_return("BRL")
       @bank.fetch_rates
       @bank.get_rate("DKK").should be_close(2.6289, 0.0001)
       @bank.get_rate("EEK").should be_close(5.5249, 0.0001)
@@ -116,13 +116,12 @@ describe Money::ExchangeBank do
     end
 
     it "should fetch for an unknown one" do
-      Money.default_currency = "XXX"
+      Money.stub!(:default_currency).and_return("XXX")
       @bank.fetch_rates
       @bank.get_rate("DKK").should be_nil
       @bank.get_rate("EUR", "USD").should be_close(1.4098, 0.001)
-      Money.default_currency = "USD"
-
     end
+
   end
 
   describe "Live Fetching" do
