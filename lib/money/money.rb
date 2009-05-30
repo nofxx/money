@@ -88,7 +88,7 @@ class Money
   # Money.ca_dollar and Money.us_dollar
   def initialize(cents, currency = nil, bank = nil)
     @cents = cents.to_i
-    @currency = currency || Money.default_currency
+    @currency = (currency ? currency.upcase : Money.default_currency)
     @bank = bank || Money.default_bank
   end
 
@@ -256,17 +256,20 @@ class Money
         symbol = ""
       end
     else
-      symbol = CURRENCIES[currency][:symbol]
+      symbol = (CURRENCIES[currency] ? CURRENCIES[currency][:symbol] : "$")
     end
     self.currency
 
+    delimiter = (CURRENCIES[currency] ? CURRENCIES[currency][:delimiter] : "," )
+    separator = (CURRENCIES[currency] ? CURRENCIES[currency][:separator] : "." )
+
     if rules[:no_cents]
       formatted = sprintf("#{symbol}%d", cents.to_f / 100)
-      formatted.gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{CURRENCIES[currency][:delimiter]}")
+      formatted.gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{delimiter}")
     else
       formatted = sprintf("#{symbol}%.2f", cents.to_f / 100).split('.')
-      formatted[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{CURRENCIES[currency][:delimiter]}")
-      formatted = formatted.join(CURRENCIES[currency][:separator])
+      formatted[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{delimiter}")
+      formatted = formatted.join(separator)
     end
 
     # Commify ("10000" => "10,000")
@@ -278,7 +281,7 @@ class Money
       formatted << currency
       formatted << '</span>' if rules[:html]
     end
-    formatted.gsub!(CURRENCIES[currency][:symbol],CURRENCIES[currency][:html]) if rules[:html]
+    formatted.gsub!(symbol,CURRENCIES[currency][:html]) if rules[:html]
     formatted
    end
 
