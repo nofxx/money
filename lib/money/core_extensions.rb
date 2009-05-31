@@ -126,9 +126,9 @@ class String
     # build the string based on major/minor since separator/delimiters have been removed
     # transform to a float, multiply by 100 to convert to cents
     if with_cents and minor == 0
-      cents = "#{major}.#{minor}".to_f
+      cents = major.to_i
     else
-      cents = "#{major}.#{minor}".to_f * 100
+      cents = (major.to_i * 100) + minor.to_i
     end
 
 
