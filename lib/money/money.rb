@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-require 'money/variable_exchange_bank'
+require 'money/exchange_bank'
 
 # Represents an amount of money in a certain currency.
 class Money
   include Comparable
-
   attr_reader :cents, :currency, :bank
+  alias :to_i :cents
 
   class << self
     # Each Money object is associated to a bank object, which is responsible
@@ -14,12 +14,22 @@ class Money
     #
     #   bank1 = MyBank.new
     #   bank2 = MyOtherBank.new
-    #e if VariableExchangeBank.
+    #
+    #   Money.default_bank = bank1
+    #   money1 = Money.new(10)
+    #   money1.bank  # => bank1
+    #
+    #   Money.default_bank = bank2
+    #   money2 = Money.new(10)
+    #   money2.bank  # => bank2
+    #   money1.bank  # => bank1
+    #
+    # The default value for this property is an instance if VariableExchangeBank.
     # It allows one to specify custom exchange rates:
     #
     #   Money.default_bank.add_rate("USD", "CAD", 1.24515)
     #   Money.default_bank.add_rate("CAD", "USD", 0.803115)
-    #   Money.us_dollar(100).exchange_to("CAD")  # => MONEY.ca_dollar(124)
+    #   Money.us_dollar(100).exchange_to("CAD")  # => Money.ca_dollar(124)
     #   Money.ca_dollar(100).exchange_to("USD")  # => Money.us_dollar(80)
     attr_accessor :default_bank
 
@@ -28,7 +38,7 @@ class Money
     attr_accessor :default_currency
   end
 
-  self.default_bank = VariableExchangeBank.instance
+  self.default_bank = ExchangeBank.instance
   self.default_currency = "USD"
 
   CURRENCIES = {
@@ -67,8 +77,8 @@ class Money
     Money.new(cents, "BRL")
   end
 
-  def self.add_rate(currency, rate)
-    Money.default_bank.add_rate(currency, rate)
+  def self.add_rate(*params)
+    Money.default_bank.add_rate(*params)
   end
 
   # Creates a new money object.
@@ -78,7 +88,7 @@ class Money
   # Money.ca_dollar and Money.us_dollar
   def initialize(cents, currency = nil, bank = nil)
     @cents = cents.to_i
-    @currency = currency || Money.default_currency
+    @currency = (currency || Money.default_currency).upcase
     @bank = bank || Money.default_bank
   end
 
@@ -114,11 +124,6 @@ class Money
     end
   end
 
-  # get the cents value of the object
-  def cents
-    @cents
-  end
-
   # multiply money by fixnum
   def *(fixnum)
     Money.new(cents * fixnum, currency)
@@ -150,21 +155,23 @@ class Money
     Money.new(rate / 100 / period * cents * count)
   end
 
-  #Round to nearest coin value
-  #  basically, we don't have coins for cents in CZK, 
-  #  our smallest fraction is 0.50CZK
+<<<<<<< HEAD:lib/money/money.rb
+  # Round to nearest coin value
+  # basically, we don't have coins for cents in CZK,
+  # our smallest fraction is 0.50CZK
   #
-  #Money.new(14_58).round_to_coin(50) => 14.50
+  #    Money.new(14_58).round_to_coin(50) => 14.50
+  #
   def round_to_coin(coin)
     coef = 1.0/coin
-    val = (cents * coef).round / coef
+    val = (cents * coef).floor / coef
     Money.new(val, currency)
   end
 
-  #Returns array a where
-  # a[0] is price _after_ applying tax (tax base)
-  # a[1] is tax
-  def tax_brakedown(tax)
+  # Returns array a where
+  #  a[0] is price _after_ applying tax (tax base)
+  #  a[1] is tax
+  def tax_breakdown(tax)
     _tax = (cents * (tax / 100.0)).round
     [Money.new(cents + _tax, currency), Money.new(_tax, currency)]
   end
@@ -172,16 +179,16 @@ class Money
   #Returns array a where
   # a[0] is price _before_ applying tax (tax base)
   # a[1] is tax
-  def tax_reverse_brakedown(tax)
+  def tax_reverse_breakdown(tax)
     coef = tax/100.0
-    [Money.new((cents / (1+coef)).round, currency), 
+    [Money.new((cents / (1+coef)).round, currency),
      Money.new((cents*coef/(1+coef)).round, currency) ]
   end
-  
+
   # Just a helper if you got tax inputs in percentage.
   # Ie. add_tax(20) =>  cents * 1.20
   def add_tax(tax)
-    tax_brakedown(tax)[0]
+    tax_breakdown(tax)[0]
   end
 
   # Split money in number of installments
@@ -250,17 +257,20 @@ class Money
         symbol = ""
       end
     else
-      symbol = CURRENCIES[currency][:symbol]
+      symbol = (CURRENCIES[currency] ? CURRENCIES[currency][:symbol] : "$")
     end
     self.currency
 
+    delimiter = (CURRENCIES[currency] ? CURRENCIES[currency][:delimiter] : "," )
+    separator = (CURRENCIES[currency] ? CURRENCIES[currency][:separator] : "." )
+
     if rules[:no_cents]
       formatted = sprintf("#{symbol}%d", cents.to_f / 100)
-      formatted.gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{CURRENCIES[currency][:delimiter]}")
+      formatted.gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{delimiter}")
     else
       formatted = sprintf("#{symbol}%.2f", cents.to_f / 100).split('.')
-      formatted[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{CURRENCIES[currency][:delimiter]}")
-      formatted = formatted.join(CURRENCIES[currency][:separator])
+      formatted[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{delimiter}")
+      formatted = formatted.join(separator)
     end
 
     # Commify ("10000" => "10,000")
@@ -272,7 +282,7 @@ class Money
       formatted << currency
       formatted << '</span>' if rules[:html]
     end
-    formatted.gsub!(CURRENCIES[currency][:symbol],CURRENCIES[currency][:html]) if rules[:html]
+    formatted.gsub!(symbol,CURRENCIES[currency][:html]) if rules[:html]
     formatted
    end
 
@@ -289,15 +299,9 @@ class Money
     rules
   end
 
-
   # Money.ca_dollar(100).to_s => "1.00"
   def to_s
     sprintf("%.2f", cents / 100.0)
-  end
-
-  # Money.new(123).to_i => "100"
-  def to_i
-    cents
   end
 
   # Money.ca_dollar(100).to_f => "1.0"
@@ -326,7 +330,7 @@ end
 
 #
 # Represent a financial array.
-# Investment/Time/Installments...
+# Investment/Time/Installments...TODO...
 #
 class Wallet < Array
 
