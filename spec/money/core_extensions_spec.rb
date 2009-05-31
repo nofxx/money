@@ -16,6 +16,7 @@ describe "Money core extensions" do
   end
 
   describe "String#to_money works" do
+    it { "20.15".to_money.should == Money.new(20_15) }
     it { "100".to_money.should == Money.new(100_00) }
     it { "100.37".to_money.should == Money.new(100_37) }
     it { "100,37".to_money.should == Money.new(100_37) }
