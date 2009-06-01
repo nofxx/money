@@ -23,7 +23,3 @@
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__))
 require 'money/money'
 require 'money/core_extensions'
-
-class Money
-  VERSION = "2.3.3"
-end

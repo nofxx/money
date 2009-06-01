@@ -12,9 +12,10 @@ This library aids one in handling money and different currencies. Features:
 
 Resources:
 
-- This fork: http://github.com/ShadowBelmolve/money
 - Website: http://money.rubyforge.org
 - RDoc API: http://money.rubyforge.org
+- This fork: http://github.com/ShadowBelmolve/money
+- Forked from: http://github.com/nofxx/money
 - Git repository: http://github.com/FooBarWidget/money/tree/master
 
 
@@ -27,7 +28,7 @@ Install stable releases with the following command:
 The development version (hosted on Github) can be installed with:
 
   gem sources -a http://gems.github.com
-  gem install ShadowBelmolve-money
+  gem install nofxx-money
 
 
 == Usage
@@ -95,7 +96,7 @@ fields on the database.
 
 config/enviroment.rb
 
-  require.gem 'ShadowBelmolve-money', :lib => 'money'
+  require.gem 'nofxx-money', :lib => 'money'
 
 app/models/product.rb
 
