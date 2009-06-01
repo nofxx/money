@@ -99,6 +99,7 @@ class Money
   end
 
   def <=>(other_money)
+    other_money = Money.new(other_money) unless other_money.is_a? Money
     if bank.same_currency?(currency, other_money.currency)
       cents <=> other_money.cents
     else
