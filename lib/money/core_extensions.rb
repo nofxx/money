@@ -10,7 +10,7 @@ class Numeric
       if self.is_a? Integer
         Money.new(self)
       else
-        Money.new(self.to_s.gsub(/\./,'').round)
+        Money.new(self.to_s.gsub(/\./,'').to_i)
       end
     else
       Money.new((self * 100).round)
@@ -28,17 +28,17 @@ class String
   #   'USD 100'.to_money   # => #<Money @cents=10000, @currency="USD">
   #   '$100 USD'.to_money  # => #<Money @cents=10000, @currency="USD">
   #   'hello 2000 world'.to_money   # => #<Money @cents=200000 @currency="USD")>
-  def to_money
+  def to_money(with_cents = false)
     # Get the currency.
     matches = scan /([A-Z]{2,3})/
     currency = matches[0] ? matches[0][0] : Money.default_currency
-    cents = calculate_cents(self)
+    cents = calculate_cents(self, with_cents)
     Money.new(cents, currency)
   end
   
   private
   
-  def calculate_cents(number)
+  def calculate_cents(number, with_cents)
     # remove anything that's not a number, potential delimiter, or minus sign
     num = number.gsub(/[^\d|\.|,|\'|\s|\-]/, '').strip
     
@@ -127,17 +127,21 @@ class String
     
     # build the string based on major/minor since separator/delimiters have been removed
     # avoiding floating point arithmetic here to ensure accuracy
-    cents = (major.to_i * 100)
-    # add the minor number as well. this may have any number of digits,
-    # so we treat minor as a string and truncate or right-fill it with zeroes
-    # until it becomes a two-digit number string, which we add to cents.
-    minor = minor.to_s
-    truncated_minor = minor[0..1]
-    truncated_minor << "0" * (2 - truncated_minor.size) if truncated_minor.size < 2
-    cents += truncated_minor.to_i
-    # respect rounding rules
-    if minor.size >= 3 && minor[2..2].to_i >= 5
-      cents += 1
+    if with_cents and minor == 0
+      cents = major.to_i
+    else
+      cents = major.to_i * 100
+      # add the minor number as well. this may have any number of digits,
+      # so we treat minor as a string and truncate or right-fill it with zeroes
+      # until it becomes a two-digit number string, which we add to cents.
+      minor = minor.to_s
+      truncated_minor = minor[0..1]
+      truncated_minor << "0" * (2 - truncated_minor.size) if truncated_minor.size < 2
+      cents += truncated_minor.to_i
+      # respect rounding rules
+      if minor.size >= 3 && minor[2..2].to_i >= 5
+        cents += 1
+      end
     end
     
     # if negative, multiply by -1; otherwise, return positive cents
