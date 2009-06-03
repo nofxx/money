@@ -15,30 +15,47 @@ describe "Money core extensions" do
     end
   end
 
-  describe "String#to_money works" do
-    it { "100".to_money.should == Money.new(100_00) }
-    it { "100.37".to_money.should == Money.new(100_37) }
-    it { "100,37".to_money.should == Money.new(100_37) }
-    it { "100 000".to_money.should == Money.new(100_000_00) }
-    it { "100.000,45".to_money.should == Money.new(100_000_45) }
-    it { "-100.100,45".to_money.should == Money.new(-100_100_45) }
+  describe "String#to_money" do
+    EXAMPLES = {
+      "20.15" => {:cents => Money.new(20_15), :no_cents => Money.new(20_15)},
+      "100" => {:cents => Money.new(100_00), :no_cents => Money.new(100)},
+      "100.37" => {:cents => Money.new(100_37), :no_cents => Money.new(100_37)},
+      "100,37" => {:cents => Money.new(100_37), :no_cents => Money.new(100_37)},
+      "100 000" => {:cents => Money.new(100_000_00), :no_cents => Money.new(100_000)},
+      "100.000,45" => {:cents => Money.new(100_000_45), :no_cents => Money.new(100_000_45)},
+      "-100.100,45" => {:cents => Money.new(-100_100_45), :no_cents => Money.new(-100_100_45)},
 
-    it { "100 USD".to_money.should == Money.new(100_00, "USD") }
-    it { "-100 USD".to_money.should == Money.new(-100_00, "USD") }
-    it { "100 EUR".to_money.should == Money.new(100_00, "EUR") }
-    it { "100.37 EUR".to_money.should == Money.new(100_37, "EUR") }
-    it { "100,37 EUR".to_money.should == Money.new(100_37, "EUR") }
+      "100 USD" => {:cents => Money.new(100_00, "USD"), :no_cents => Money.new(100, "USD")},
+      "-100 USD" => {:cents => Money.new(-100_00, "USD"), :no_cents => Money.new(-100, "USD")},
+      "100 EUR" => {:cents => Money.new(100_00, "EUR"), :no_cents => Money.new(100, "EUR")},
+      "100.37 EUR" => {:cents => Money.new(100_37, "EUR"), :no_cents => Money.new(100_37, "EUR")},
+      "100,37 EUR" => {:cents => Money.new(100_37, "EUR"), :no_cents => Money.new(100_37, "EUR")},
 
-    it { "USD 100".to_money.should == Money.new(100_00, "USD") }
-    it { "EUR 100".to_money.should == Money.new(100_00, "EUR") }
-    it { "EUR 100.37".to_money.should == Money.new(100_37, "EUR") }
-    it { "CAD -100.37".to_money.should == Money.new(-100_37, "CAD") }
-    it { "EUR 100,37".to_money.should == Money.new(100_37, "EUR") }
-    it { "EUR -100,37".to_money.should == Money.new(-100_37, "EUR") }
+      "USD 100" => {:cents => Money.new(100_00, "USD"), :no_cents => Money.new(100, "USD")},
+      "EUR 100" => {:cents => Money.new(100_00, "EUR"), :no_cents => Money.new(100, "EUR")},
+      "EUR 100.37" => {:cents => Money.new(100_37, "EUR"), :no_cents => Money.new(100_37, "EUR")},
+      "CAD -100.37" => {:cents => Money.new(-100_37, "CAD"), :no_cents => Money.new(-100_37, "CAD")},
+      "EUR 100,37" => {:cents => Money.new(100_37, "EUR"), :no_cents => Money.new(100_37, "EUR")},
+      "EUR -100,37" => {:cents => Money.new(-100_37, "EUR"), :no_cents => Money.new(-100_37, "EUR")},
 
-    it { "BRL 100,37".to_money.should == Money.new(100_37, "BRL") }
-    it { "BRL -100,37".to_money.should == Money.new(-100_37, "BRL") }
+      "BRL 100,37" => {:cents => Money.new(100_37, "BRL"), :no_cents => Money.new(100_37, "BRL")},
+      "BRL -100,37" => {:cents => Money.new(-100_37, "BRL"), :no_cents => Money.new(-100_37, "BRL")},
 
-    it {"$100 USD".to_money.should == Money.new(100_00, "USD") }
+      "$100 USD" => {:cents => Money.new(100_00, "USD"), :no_cents => Money.new(100, "USD")}
+    }
+
+    EXAMPLES.each_pair do |string, expected_money|
+      it "should convert '#{string}' with cents by default" do
+        string.to_money.should == expected_money[:cents]
+      end
+
+      it "should convert '#{string}' without cents" do
+        string.to_money(true).should == expected_money[:no_cents]
+      end
+
+      it "should convert '#{string}' with cents" do
+        string.to_money(false).should == expected_money[:cents]
+      end
+    end
   end
 end

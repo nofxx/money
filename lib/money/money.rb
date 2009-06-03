@@ -155,7 +155,6 @@ class Money
     Money.new(rate / 100 / period * cents * count)
   end
 
-<<<<<<< HEAD:lib/money/money.rb
   # Round to nearest coin value
   # basically, we don't have coins for cents in CZK,
   # our smallest fraction is 0.50CZK

@@ -12,20 +12,11 @@ This library aids one in handling money and different currencies. Features:
 
 Resources:
 
-<<<<<<< HEAD:README.rdoc
 - This fork: http://github.com/bobek/money
 - Website: http://money.rubyforge.org
 - RDoc API: http://money.rubyforge.org
 - Forked from: http://github.com/ShadowBelmolve/money/tree
 - Original git repository: http://github.com/FooBarWidget/money/tree/master
-=======
-- Website: http://money.rubyforge.org
-- RDoc API: http://money.rubyforge.org
-- This fork: http://github.com/ShadowBelmolve/money
-- Forked from: http://github.com/nofxx/money
-- Git repository: http://github.com/FooBarWidget/money/tree/master
->>>>>>> nofxx/master:README.rdoc
-
 
 == Download
 
@@ -36,11 +27,7 @@ Install stable releases with the following command:
 The development version (hosted on Github) can be installed with:
 
   gem sources -a http://gems.github.com
-<<<<<<< HEAD:README.rdoc
   gem install bobek-money
-=======
-  gem install nofxx-money
->>>>>>> nofxx/master:README.rdoc
 
 
 == Usage
