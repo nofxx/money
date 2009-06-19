@@ -122,6 +122,12 @@ describe Money::ExchangeBank do
       @bank.get_rate("EUR", "USD").should be_close(1.4098, 0.001)
     end
 
+    it "should be convert EUR to BRL with rates of ECB" do
+      Money.stub!(:default_currency).and_return("USD")
+      @bank.fetch_rates
+      @bank.exchange(100, "EUR", "BRL")
+    end
+
   end
 
   describe "Live Fetching" do
