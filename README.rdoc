@@ -12,26 +12,20 @@ This library aids one in handling money and different currencies. Features:
 
 Resources:
 
+
+- Forked from: http://github.com/FooBarWidget/money
 - Website: http://money.rubyforge.org
 - RDoc API: http://money.rubyforge.org
-- This fork: http://github.com/ShadowBelmolve/money
-- Forked from: http://github.com/nofxx/money
-- Git repository: http://github.com/FooBarWidget/money/tree/master
 
 
-== Download
+== Install
 
-Install stable releases with the following command:
+The usual.
 
-  gem install money
-
-The development version (hosted on Github) can be installed with:
-
-  gem sources -a http://gems.github.com
   gem install nofxx-money
 
 
-== Usage
+== Use
 
 === Synopsis
 
@@ -88,6 +82,17 @@ www.xe.com for the current rates or just returns <tt>rand(2)</tt>:
   Money.default_bank = ExchangeBankWhichScrapesXeDotCom.new
 
 
+=== Default Currency
+
+By default Money defaults to USD as its currency. This can be overwritten using:
+
+  Money.default_currency = "CAD"
+
+If you use Rails, then environment.rb is a very good place to put this.
+
+
+== Webapps
+
 === Ruby on Rails
 
 Use the +has_money+ method to embed the money object in your models.
@@ -114,19 +119,7 @@ migration:
     t.string  :price_currency
   end
 
+=== jQuery
 
-=== Default Currency
-
-By default Money defaults to USD as its currency. This can be overwritten using:
-
-  Money.default_currency = "CAD"
-
-If you use Rails, then environment.rb is a very good place to put this.
-
-
-== TODO
-
-* Better validation (fix composed_of allow_nil)
-* Interest (almost there..)
-* Remote rate fetching
-
+Check out http://meiaduzia.com.br/cuducos2/priceformat for a nice
+mask for webapp's textfields.

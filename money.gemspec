@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{money}
-  s.version = "2.3.6"
+  s.version = "2.3.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Money Team"]
-  s.date = %q{2009-05-29}
+  s.date = %q{2009-06-20}
   s.description = %q{This library aids one in handling money and different currencies.}
   s.email = %q{see@reame}
   s.extra_rdoc_files = [
@@ -41,14 +41,14 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/nofxx/money}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.3}
+  s.rubygems_version = %q{1.3.4}
   s.summary = %q{This library aids one in handling money and different currencies.}
   s.test_files = [
-    "spec/money/exchange_bank_spec.rb",
+    "spec/db/schema.rb",
      "spec/money/acts_as_money_spec.rb",
+     "spec/money/exchange_bank_spec.rb",
      "spec/money/money_spec.rb",
      "spec/money/core_extensions_spec.rb",
-     "spec/db/schema.rb",
      "spec/spec_helper.rb"
   ]
 

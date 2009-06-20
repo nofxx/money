@@ -88,8 +88,7 @@ describe Money::ExchangeBank do
   end
 
   it "raises Money::UnknownRate upon conversion if the conversion rate is unknown" do
-    block = lambda { @bank.exchange(10, "USD", "ABC") }
-    block.should raise_error(Money::UnknownRate)
+    lambda { @bank.exchange(10, "USD", "ABC") }.should raise_error(Money::UnknownRate)
   end
 
   describe "Fetching Data" do
@@ -120,6 +119,23 @@ describe Money::ExchangeBank do
       @bank.fetch_rates
       @bank.get_rate("DKK").should be_nil
       @bank.get_rate("EUR", "USD").should be_close(1.4098, 0.001)
+    end
+
+    it "should fetch only what I want" do
+      Money.stub!(:default_currency).and_return("BRL")
+      @bank.default_rates = ["BRL", "EUR"]
+      @bank.fetch_rates
+      @bank.get_rate("DKK").should be_nil
+      @bank.get_rate("USD").should be_nil
+      @bank.get_rate("EUR").should be_close(2.832, 0.001)
+    end
+
+    it "should be convert EUR to BRL with default USD" do
+      Money.stub!(:default_currency).and_return("USD")
+      @bank.default_rates = ["BRL", "EUR", "USD"]
+      @bank.fetch_rates
+      @bank.exchange(100, "BRL", "EUR").should be_close(2,2)
+      @bank.exchange(100, "EUR", "BRL")
     end
 
   end

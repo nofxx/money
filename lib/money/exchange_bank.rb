@@ -26,6 +26,10 @@ end
 #  bank.exchange(100_00, "USD", "CAD")  # => 6450
 class Money
   class ExchangeBank
+    #
+    # Rates to be autofetched
+    attr_accessor :default_rates
+
     # Returns the singleton instance of ExchangeBank.
     #
     # By default, <tt>Money.default_bank</tt> returns the same object.
@@ -51,6 +55,7 @@ class Money
       @mutex.synchronize do
         @rates["#{from}<>#{to}".upcase] = rate
         @rates["#{to}<>#{from}".upcase] = 1.0/rate
+        @rates["sync_at"] = Time.now.to_i
       end
     end
 
@@ -74,12 +79,14 @@ class Money
     # Returns the amount of cents in +to_currency+ as an integer, rounded down.
     #
     # If the conversion rate is unknown, then Money::UnknownRate will be raised.
-    def exchange(cents, from_currency, to_currency)
-      rate = get_rate(from_currency, to_currency)
-      if !rate
-        raise Money::UnknownRate, "No conversion rate known for '#{from_currency}' -> '#{to_currency}'"
-      end
+    def exchange(cents, from, to)
+      rate =  get_rate(from, to)
+      raise(Money::UnknownRate, "No conversion rate for #{from} -> #{to}") unless rate
       (cents * rate).floor
+    end
+
+    def fetch_rate(from, to)
+
     end
 
     # Fetch rates
@@ -88,7 +95,11 @@ class Money
       curr = (xml/:Cube).select { |r| r["currency"] == Money.default_currency }.first
       diff = Money.default_currency == "EUR" || !curr ? 1 : curr["rate"].to_f
       (xml/:Cube).each do |x|
-        parse_rate x['rate'].to_f / diff, curr ? Money.default_currency : "EUR", x['currency'].upcase if x['currency']
+        r = x['rate'].to_f
+        c = x['currency'] || ""
+        unless default_rates && !default_rates.include?(c)
+          parse_rate r / diff, curr ? Money.default_currency : "EUR", c.upcase
+        end
       end
       parse_rate diff, Money.default_currency, "EUR" if curr
       self
