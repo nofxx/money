@@ -9,7 +9,7 @@ This library aids one in handling money and different currencies. Features:
 - Provides APIs for exchanging money from one currency to another.
 - Has the ability to parse a money string into a Money object.
 - Provides ActiveRecord "has_money" method.
-
+- Autofetch rates from ECB
 
 == Install
 
@@ -84,11 +84,21 @@ www.xe.com for the current rates or just returns <tt>rand(2)</tt>:
 
 === Default Currency
 
-By default Money defaults to USD as its currency. This can be overwritten using:
+Money defaults to USD as its currency. This can be overwritten using:
 
   Money.default_currency = "CAD"
 
 If you use Rails, then environment.rb is a very good place to put this.
+
+
+=== Autofetch rates
+
+By default, Money won't fetch the rates automatically, you need to call: @bank.fetch_rates
+
+If you have your bank default rates configured, it'll fetch all possible rates from it,
+if you don't, It'll fetch all rates to and from your default_currency.
+
+Money uses the ECB XML Feed.
 
 
 == Webapps
