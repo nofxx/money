@@ -35,22 +35,22 @@ class String
     cents = calculate_cents(self, with_cents)
     Money.new(cents, currency)
   end
-  
+
   private
-  
+
   def calculate_cents(number, with_cents)
     # remove anything that's not a number, potential delimiter, or minus sign
     num = number.gsub(/[^\d|\.|,|\'|\s|\-]/, '').strip
-    
+
     # set a boolean flag for if the number is negative or not
     negative = num.split(//).first == "-"
-    
+
     # if negative, remove the minus sign from the number
     num = num.gsub(/^-/, '') if negative
-    
+
     # gather all separators within the result number
     used_separators = num.scan /[^\d]/
-    
+
     # determine the number of unique separators within the number
     #
     # e.g.
@@ -61,8 +61,8 @@ class String
     case used_separators.uniq.length
     # no separator or delimiter; major (dollars) is the number, and minor (cents) is 0
     when 0 then major, minor = num, 0
-    
-    # two separators, so we know the last item in this array is the 
+
+    # two separators, so we know the last item in this array is the
     # major/minor delimiter and the rest are separators
     when 2
       separator, delimiter = used_separators.uniq
@@ -78,10 +78,10 @@ class String
       # 1,000,000 - comma is a separator
       # 10000,00 - comma is a delimiter
       # 1000,000 - comma is a delimiter
-      
+
       # assign first separator for reusability
       separator = used_separators.first
-      
+
       # separator is used as a separator when there are multiple instances, always
       if num.scan(separator).length > 1 # multiple matches; treat as separator
         major, minor = num.gsub(separator, ''), 0
@@ -91,7 +91,7 @@ class String
         possible_major, possible_minor = num.split(separator)
         possible_major ||= "0"
         possible_minor ||= "00"
-        
+
         # if the minor (cents) length isn't 3, assign major/minor from the possibles
         # e.g.
         #   1,00 => 1.00
@@ -102,8 +102,8 @@ class String
         else
           # minor length is three
           # let's try to figure out intent of the delimiter
-          
-          # the major length is greater than three, which means 
+
+          # the major length is greater than three, which means
           # the comma or period is used as a delimiter
           # e.g.
           #   1000,000
@@ -124,10 +124,10 @@ class String
     else
       raise ArgumentError, "Invalid currency amount"
     end
-    
+
     # build the string based on major/minor since separator/delimiters have been removed
     # avoiding floating point arithmetic here to ensure accuracy
-    if with_cents and minor == 0
+    if with_cents #and minor == 0
       cents = major.to_i
     else
       cents = major.to_i * 100
@@ -143,10 +143,10 @@ class String
         cents += 1
       end
     end
-    
+
     # if negative, multiply by -1; otherwise, return positive cents
     negative ? cents * -1 : cents
   end
-  
+
 end
 
