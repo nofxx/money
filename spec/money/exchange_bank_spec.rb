@@ -1,5 +1,12 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 
+# To spec better
+class Money
+  class ExchangeBank
+    attr_reader :rates
+  end
+end
+
 describe Money::ExchangeBank do
   before :each do
     @bank = Money::ExchangeBank.new
@@ -91,27 +98,59 @@ describe Money::ExchangeBank do
     lambda { @bank.exchange(10, "USD", "ABC") }.should raise_error(Money::UnknownRate)
   end
 
-  describe "Fetching Data" do
+  describe "Auto fetching data" do
 
     before(:each) do
       URI.should_receive(:parse).with("http://www.ecb.int/stats/eurofxref/eurofxref-daily.xml").and_return(:uri)
       Net::HTTP.should_receive(:get).with(:uri).and_return("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<gesmes:Envelope xmlns:gesmes=\"http://www.gesmes.org/xml/2002-08-01\" xmlns=\"http://www.ecb.int/vocabulary/2002-08-01/eurofxref\">\n\t<gesmes:subject>Reference rates</gesmes:subject>\n\t<gesmes:Sender>\n\t\t<gesmes:name>European Central Bank</gesmes:name>\n\t</gesmes:Sender>\n\t<Cube>\n\t\t<Cube time='2009-05-29'>\n\t\t\t<Cube currency='USD' rate='1.4098'/>\n\t\t\t<Cube currency='JPY' rate='135.22'/>\n\t\t\t<Cube currency='BGN' rate='1.9558'/>\n\t\t\t<Cube currency='CZK' rate='26.825'/>\n\t\t\t<Cube currency='DKK' rate='7.4453'/>\n\t\t\t<Cube currency='EEK' rate='15.6466'/>\n\t\t\t<Cube currency='GBP' rate='0.87290'/>\n\t\t\t<Cube currency='HUF' rate='282.48'/>\n\t\t\t<Cube currency='LTL' rate='3.4528'/>\n\t\t\t<Cube currency='LVL' rate='0.7093'/>\n\t\t\t<Cube currency='PLN' rate='4.4762'/>\n\t\t\t<Cube currency='RON' rate='4.1825'/>\n\t\t\t<Cube currency='SEK' rate='10.6678'/>\n\t\t\t<Cube currency='CHF' rate='1.5128'/>\n\t\t\t<Cube currency='NOK' rate='8.8785'/>\n\t\t\t<Cube currency='HRK' rate='7.3500'/>\n\t\t\t<Cube currency='RUB' rate='43.4455'/>\n\t\t\t<Cube currency='TRY' rate='2.1737'/>\n\t\t\t<Cube currency='AUD' rate='1.7671'/>\n\t\t\t<Cube currency='BRL' rate='2.8320'/>\n\t\t\t<Cube currency='CAD' rate='1.5501'/>\n\t\t\t<Cube currency='CNY' rate='9.6263'/>\n\t\t\t<Cube currency='HKD' rate='10.9273'/>\n\t\t\t<Cube currency='IDR' rate='14539.26'/>\n\t\t\t<Cube currency='INR' rate='66.4260'/>\n\t\t\t<Cube currency='KRW' rate='1764.04'/>\n\t\t\t<Cube currency='MXN' rate='18.4340'/>\n\t\t\t<Cube currency='MYR' rate='4.9167'/>\n\t\t\t<Cube currency='NZD' rate='2.2135'/>\n\t\t\t<Cube currency='PHP' rate='66.516'/>\n\t\t\t<Cube currency='SGD' rate='2.0350'/>\n\t\t\t<Cube currency='THB' rate='48.377'/>\n\t\t\t<Cube currency='ZAR' rate='11.2413'/>\n\t\t</Cube>\n\t</Cube>\n</gesmes:Envelope>")
     end
 
-    it "should fetch data" do
-      Money.stub!(:default_currency).and_return("EUR")
-      @bank.fetch_rates
-      @bank.get_rate("DKK").should be_close(7.4453, 0.0001)
-      @bank.get_rate("BRL").should be_close(2.832, 0.001)
-      @bank.exchange(10_00, "EUR", "DKK").should == 74_45
+    describe "EUR Default" do
+
+      before(:each) do
+        Money.stub!(:default_currency).and_return("EUR")
+        @bank.fetch_rates
+      end
+
+      it "should fetch data" do
+        @bank.get_rate("DKK").should be_close(7.4453, 0.0001)
+        @bank.get_rate("BRL").should be_close(2.832, 0.001)
+      end
+
+      it "should fetch and exchange" do
+        @bank.exchange(10_00, "EUR", "BRL").should == 28_32
+        @bank.exchange(28_32, "BRL", "EUR").should == 10_00
+      end
+
+      it "should fetch and exchange" do
+        @bank.exchange(10_00, "EUR", "DKK").should == 74_45
+        @bank.exchange(74_45, "DKK", "EUR").should ==  9_99
+      end
+
     end
 
-    it "should fetch diff than eur" do
-      Money.stub!(:default_currency).and_return("BRL")
-      @bank.fetch_rates
-      @bank.get_rate("DKK").should be_close(2.6289, 0.0001)
-      @bank.get_rate("EEK").should be_close(5.5249, 0.0001)
-      @bank.get_rate("EUR").should be_close(2.832, 0.001)
+    describe "BRL Default" do
+
+      before(:each) do
+        Money.stub!(:default_currency).and_return("BRL")
+        @bank.fetch_rates
+      end
+
+      it "should fetch diff than eur" do
+        @bank.get_rate("DKK").should be_close(2.6289, 0.0001)
+        @bank.get_rate("EEK").should be_close(5.5249, 0.0001)
+        @bank.get_rate("EUR").should be_close(0.3531, 0.001)
+      end
+
+      it "should fetch and exchange" do
+        @bank.exchange(10_00, "EUR", "BRL").should == 28_32
+        @bank.exchange(28_32, "BRL", "EUR").should == 10_00
+      end
+
+      it "should exchange diff than eur" do
+        @bank.exchange(10_00, "BRL", "DKK").should == 26_28
+        @bank.exchange(26_28, "DKK", "BRL").should ==  9_99
+      end
     end
 
     it "should fetch for an unknown one" do
@@ -119,6 +158,8 @@ describe Money::ExchangeBank do
       @bank.fetch_rates
       @bank.get_rate("DKK").should be_nil
       @bank.get_rate("EUR", "USD").should be_close(1.4098, 0.001)
+      @bank.exchange(10_00, "EUR", "BRL").should == 28_32
+      @bank.exchange(28_32, "BRL", "EUR").should == 10_00
     end
 
     it "should fetch only what I want" do
@@ -127,15 +168,25 @@ describe Money::ExchangeBank do
       @bank.fetch_rates
       @bank.get_rate("DKK").should be_nil
       @bank.get_rate("USD").should be_nil
-      @bank.get_rate("EUR").should be_close(2.832, 0.001)
+      @bank.get_rate("EUR").should be_close(0.3531, 0.001)
     end
 
-    it "should be convert EUR to BRL with default USD" do
+    it "should exchange only what I want" do
+      Money.stub!(:default_currency).and_return("BRL")
+      @bank.default_rates = ["BRL", "EUR"]
+      @bank.fetch_rates
+      lambda { @bank.exchange(100, "BRL", "DKK") }.should raise_error
+      lambda { @bank.exchange(100, "EUR", "DKK") }.should raise_error
+      @bank.rates.should have(2).keys
+    end
+
+    it "should convert B to C with default A" do
       Money.stub!(:default_currency).and_return("USD")
       @bank.default_rates = ["BRL", "EUR", "USD"]
       @bank.fetch_rates
-      @bank.exchange(100, "BRL", "EUR").should be_close(2,2)
-      @bank.exchange(100, "EUR", "BRL")
+      @bank.exchange(10_00, "EUR", "BRL").should == 28_32
+      @bank.exchange(28_32, "BRL", "EUR").should == 10_00
+      @bank.rates.should have(6).keys
     end
 
   end

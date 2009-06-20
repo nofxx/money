@@ -55,7 +55,7 @@ class Money
       @mutex.synchronize do
         @rates["#{from}<>#{to}".upcase] = rate
         @rates["#{to}<>#{from}".upcase] = 1.0/rate
-        @rates["sync_at"] = Time.now.to_i
+      #  @rates["sync_at"] = Time.now.to_i
       end
     end
 
@@ -82,27 +82,31 @@ class Money
     def exchange(cents, from, to)
       rate =  get_rate(from, to)
       raise(Money::UnknownRate, "No conversion rate for #{from} -> #{to}") unless rate
-      (cents * rate).floor
+      (cents * rate).floor # or round here?
     end
 
-    def fetch_rate(from, to)
-
+    def fetch_rate(rate, xml)
+      curr = (xml/:Cube).select { |r| r["currency"] == rate }.first
+      diff = (rate == "EUR" || !curr) ? 1 : curr["rate"].to_f
+      (xml/:Cube).each do |x|
+        c = x['currency'] || ""
+        unless default_rates && !default_rates.include?(c)
+          parse_rate x['rate'].to_f / diff, curr ? rate : "EUR", c.upcase
+        end
+      end
+      parse_rate 1.0/diff, rate, "EUR" if curr
     end
 
     # Fetch rates
     def fetch_rates
       xml = Parser::XML(Net::HTTP.get(URI.parse('http://www.ecb.int/stats/eurofxref/eurofxref-daily.xml')))
-      curr = (xml/:Cube).select { |r| r["currency"] == Money.default_currency }.first
-      diff = Money.default_currency == "EUR" || !curr ? 1 : curr["rate"].to_f
-      (xml/:Cube).each do |x|
-        r = x['rate'].to_f
-        c = x['currency'] || ""
-        unless default_rates && !default_rates.include?(c)
-          parse_rate r / diff, curr ? Money.default_currency : "EUR", c.upcase
+      if default_rates
+        for rate in default_rates
+          fetch_rate(rate, xml)
         end
+      else
+        fetch_rate Money.default_currency, xml
       end
-      parse_rate diff, Money.default_currency, "EUR" if curr
-      self
     end
 
     # Auto fetch the currencies every X seconds
