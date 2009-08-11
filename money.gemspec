@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-
 Gem::Specification.new do |s|
   s.name = %q{money}
   s.version = "2.3.10"
@@ -8,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors = ["Money Team"]
   s.date = %q{2009-06-20}
   s.description = %q{This library aids one in handling money and different currencies.}
-  s.email = %q{see@reame}
+  s.email = %q{see@readme}
   s.extra_rdoc_files = [
     "README.rdoc"
   ]

@@ -214,6 +214,9 @@ describe Money do
       it { @cash.format(:symbol => "R$ ").should eql("R$ 2.00") }
       it { @cash.format(:no_cents => true).should eql("¥2") }
       it { @cash.format(:no_cents => true, :symbol => "R$ ").should eql("R$ 2") }
+      it { @cash.format(:symbol => false).should eql("2.00") }
+      it { @cash.format(:symbol => nil).should eql("2.00") }
+      it { @cash.format(:symbol => "").should eql("2.00") }
       it { @cash.format(:html => true).should eql("&yen;2.00") }
     end
 

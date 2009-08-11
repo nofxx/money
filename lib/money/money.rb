@@ -215,31 +215,36 @@ class Money
   end
 
   # Format the price according to several rules
-  # Currently supported are :with_currency, :no_cents, :symbol and :html
+  # Currently supported are :with_currency, :no_cents, :symbol and :html.
   #
-  # with_currency:
+  # === +:with_currency+
   #
-  #  Money.ca_dollar(0).format => "free"
   #  Money.ca_dollar(100).format => "$1.00"
   #  Money.ca_dollar(100).format(:with_currency => true) => "$1.00 CAD"
   #  Money.us_dollar(85).format(:with_currency => true) => "$0.85 USD"
   #
-  # no_cents:
+  # === +:no_cents+
   #
   #  Money.ca_dollar(100).format(:no_cents) => "$1"
   #  Money.ca_dollar(599).format(:no_cents) => "$5"
-  #
   #  Money.ca_dollar(570).format(:no_cents, :with_currency) => "$5 CAD"
   #  Money.ca_dollar(39000).format(:no_cents) => "$390"
   #
-  # symbol:
+  # === +:symbol+
   #
   #  Money.new(100, :currency => "GBP").format(:symbol => "£") => "£1.00"
+  #  Money.new(100, :currency => "GBP").format(:symbol => "UU") => "UU1.00"
   #
-  # html:
+  # === +:display_free+
+  #
+  #  Money.ca_dollar(0).format => "free"
+  #  Money.real(0).format(:display_free => "Gratis") => "Gratis"
+  #
+  # === +:html+
   #
   #  Money.ca_dollar(570).format(:html => true, :with_currency => true) =>  "$5.70 <span class=\"currency\">CAD</span>"
-   def format(*rules)
+  #
+  def format(*rules)
     # support for old format parameters
     rules = normalize_formatting_rules(rules)
 
@@ -251,19 +256,10 @@ class Money
       end
     end
 
-    if rules.has_key?(:symbol)
-      if rules[:symbol]
-        symbol = rules[:symbol]
-      else
-        symbol = "$"
-      end
-    else
-      symbol = (CURRENCIES[currency] ? CURRENCIES[currency][:symbol] : "$")
-    end
-    self.currency
-
-    delimiter = (CURRENCIES[currency] ? CURRENCIES[currency][:delimiter] : "," )
-    separator = (CURRENCIES[currency] ? CURRENCIES[currency][:separator] : "." )
+    curr = CURRENCIES[currency]
+    symbol = rules.has_key?(:symbol) ? (rules[:symbol] || "") : (curr ? curr[:symbol] : "$")
+    delimiter = (curr ? curr[:delimiter] : "," )
+    separator = (curr ? curr[:separator] : "." )
 
     if rules[:no_cents]
       formatted = sprintf("#{symbol}%d", cents.to_f / 100)
@@ -283,11 +279,11 @@ class Money
       formatted << currency
       formatted << '</span>' if rules[:html]
     end
-    formatted.gsub!(symbol,CURRENCIES[currency][:html]) if rules[:html]
+    formatted.gsub!(symbol,curr[:html]) if rules[:html]
     formatted
-   end
+  end
 
-   def normalize_formatting_rules(rules)
+  def normalize_formatting_rules(rules)
     if rules.size == 1
       rules = rules.pop
       rules = { rules => true } if rules.is_a?(Symbol)

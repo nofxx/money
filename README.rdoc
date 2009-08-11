@@ -81,6 +81,11 @@ www.xe.com for the current rates or just returns <tt>rand(2)</tt>:
 
   Money.default_bank = ExchangeBankWhichScrapesXeDotCom.new
 
+=== `new` or `to_money` ?
+
+If you already have a value in integer/float or a string which ruby can parse
+with `to_i`, use new. It'll avoid the string parser, which is resource intensive.
+
 
 === Default Currency
 
