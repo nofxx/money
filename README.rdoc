@@ -93,12 +93,12 @@ If you use Rails, then environment.rb is a very good place to put this.
 
 === Autofetch rates
 
-By default, Money won't fetch the rates automatically, you need to call: @bank.fetch_rates
+By default, Money won't fetch the rates automatically, you need to call: @some_bank.fetch_rates
 
 If you have your bank default rates configured, it'll fetch all possible rates from it,
 if you don't, It'll fetch all rates to and from your default_currency.
 
-Money uses the ECB XML Feed.
+Money uses the ECB XML Feed. (http://ecb.int)
 
 
 == Webapps
@@ -149,6 +149,6 @@ Orinally developed by:
 
 This branch is part of:
 
-:: http://github.com/bobek/money
-:: http://github.com/nofxx/money
-:: http://github.com/ShadowBelmove/money
+* http://github.com/bobek/money
+* http://github.com/nofxx/money
+* http://github.com/ShadowBelmove/money

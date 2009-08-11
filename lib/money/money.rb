@@ -47,6 +47,7 @@ class Money
     "HKD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
     "SGD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
     "BRL" => { :delimiter => ".", :separator => ",", :symbol => "R$" },
+    "ZWD" => { :delimiter => ",", :separator => ".", :symbol => "Z$"},
     "EUR" => { :delimiter => ",", :separator => ".", :symbol => '€', :html => '&euro;' },
     "GBP" => { :delimiter => ",", :separator => ".", :symbol => '£', :html => '&pound;' },
     "JPY" => { :delimiter => ".", :separator => ".", :symbol => '¥', :html => '&yen;' },
@@ -254,7 +255,7 @@ class Money
       if rules[:symbol]
         symbol = rules[:symbol]
       else
-        symbol = ""
+        symbol = "$"
       end
     else
       symbol = (CURRENCIES[currency] ? CURRENCIES[currency][:symbol] : "$")
