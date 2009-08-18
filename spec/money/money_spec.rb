@@ -263,6 +263,14 @@ describe Money do
         it "#- substracts the other object's amount from the current object's amount while retaining the currency" do
           (Money.new(10_00, "USD") - Money.new(90, "USD")).should == Money.new(9_10, "USD")
         end
+
+        it "should return to -@ method" do
+          (-(Money.new(5))).cents.should eql(-5)
+        end
+
+        it "should return to -@ method" do
+          (-(Money.new(-5))).cents.should eql(5)
+        end
       end
 
       describe "if the other Money object has a different currency" do

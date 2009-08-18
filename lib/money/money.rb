@@ -41,6 +41,7 @@ class Money
   self.default_bank = ExchangeBank.instance
   self.default_currency = "USD"
 
+  # http://www.xe.com/symbols.php
   CURRENCIES = {
     "USD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
     "CAD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
@@ -124,6 +125,10 @@ class Money
     else
       Money.new(cents - other_money.exchange_to(currency).cents, currency)
     end
+  end
+
+  def -@
+    Money.new(-cents)
   end
 
   # multiply money by fixnum
