@@ -12,6 +12,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'money'
 
 config = YAML.load_file(File.dirname(__FILE__) + '/db/database.yml')
+config[:adapter] = "jdbcsqlite3" if RUBY_PLATFORM =~ /java/
 ActiveRecord::Base.logger = Logger.new("/tmp/money-debug.log")
 ActiveRecord::Base.establish_connection(config)
 
