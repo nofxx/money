@@ -41,7 +41,7 @@ describe "Acts as Money" do
     lambda do
       @account = Account.create!(:value => 10, :total => "20 BRL")
     end.should change(Account, :count).by(1)
-    Account.last.total.format.should eql("R$20,00")
+    Account.last.total.format.should eql("R$ 20,00")
   end
 
 

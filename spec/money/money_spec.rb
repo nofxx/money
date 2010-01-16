@@ -195,7 +195,7 @@ describe Money do
       before(:each) do
         @one = Proc.new { |cur| Money.new(100, cur).format }
       end
-      it { @one["BRL"].should eql "R$1,00" }
+      it { @one["BRL"].should eql "R$ 1,00" }
       it { @one["USD"].should eql "$1.00" }
       it { @one["EUR"].should eql "€1.00" }
       it { @one["CAD"].should eql "$1.00" }
@@ -211,7 +211,7 @@ describe Money do
         @cash =  Money.new(2_00, "JPY")
       end
       it { @cash.format.should eql("¥2.00") }
-      it { @cash.format(:symbol => "R$ ").should eql("R$ 2.00") }
+      it { @cash.format(:symbol => "R$").should eql("R$2.00") }
       it { @cash.format(:no_cents => true).should eql("¥2") }
       it { @cash.format(:no_cents => true, :symbol => "R$ ").should eql("R$ 2") }
       it { @cash.format(:symbol => false).should eql("2.00") }
@@ -231,17 +231,17 @@ describe Money do
     it { Money.new(80000).format.should eql("$800.00") }
     it { Money.new(800000).format.should eql("$8,000.00") }
     it { Money.new(-8000000, "JPY").format(:no_cents => true).should eql("¥-80.000") }
-    it { Money.new(87654321, "BRL").format.should eql("R$876.543,21") }
-    it { Money.new(87654321, "brl").format.should eql("R$876.543,21") }
-    it { Money.new(800000000, "BRL").format.should eql("R$8.000.000,00") }
-    it { Money.new(8000000000, "BRL").format.should eql("R$80.000.000,00") }
+    it { Money.new(87654321, "BRL").format.should eql("R$ 876.543,21") }
+    it { Money.new(87654321, "brl").format.should eql("R$ 876.543,21") }
+    it { Money.new(800000000, "BRL").format.should eql("R$ 8.000.000,00") }
+    it { Money.new(8000000000, "BRL").format.should eql("R$ 80.000.000,00") }
     it { Money.new(80000000000, "CAD").format.should eql("$800,000,000.00") }
     it { Money.new(880000000000, "GBP").format(:no_cents => true).should eql("£8,800,000,000") }
     it { Money.new(8800000000088, "EUR").format.should eql("€88,000,000,000.88") }
-    it { Money.new("10000", "BRL").format.should eql("R$100,00") }
+    it { Money.new("10000", "BRL").format.should eql("R$ 100,00") }
     it { Money.new("10000", "USD").format.should eql("$100.00") }
     it { "10,000.00 USD".to_money.format.should eql("$10,000.00") }
-    it { "10,000.00 BRL".to_money.format.should eql("R$10.000,00") }
+    it { "10,000.00 BRL".to_money.format.should eql("R$ 10.000,00") }
 
     it "should fail nicely if symbol can`t be found" do
       Money.stub!(:default_currency).and_return("XXX")

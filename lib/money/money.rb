@@ -47,7 +47,7 @@ class Money
     "CAD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
     "HKD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
     "SGD" => { :delimiter => ",", :separator => ".", :symbol => "$" },
-    "BRL" => { :delimiter => ".", :separator => ",", :symbol => "R$" },
+    "BRL" => { :delimiter => ".", :separator => ",", :symbol => "R$ " },
     "ZWD" => { :delimiter => ",", :separator => ".", :symbol => "Z$"},
     "EUR" => { :delimiter => ",", :separator => ".", :symbol => '€', :html => '&euro;' },
     "GBP" => { :delimiter => ",", :separator => ".", :symbol => '£', :html => '&pound;' },
@@ -279,7 +279,6 @@ class Money
     formatted.gsub!(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
 
     if rules[:with_currency]
-      formatted << " "
       formatted << '<span class="currency">' if rules[:html]
       formatted << currency
       formatted << '</span>' if rules[:html]

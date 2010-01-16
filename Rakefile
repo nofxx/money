@@ -4,7 +4,7 @@ require 'rake'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "money"
+    gem.name = "nofxx-money"
     gem.summary = "This library aids one in handling money and different currencies."
     gem.description = "This library aids one in handling money and different currencies."
     gem.email = "see@reame"
